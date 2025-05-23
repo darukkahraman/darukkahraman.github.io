@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueSky Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            border-left: 1px solid #e6e6e6;
+            border-right: 1px solid #e6e6e6;
+        }
+
+        .navigation {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 200px;
+        }
+
+        .nav-item {
+            padding: 15px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .nav-item.active {
+            color: #0085ff;
+            background-color: rgba(0, 133, 255, 0.1);
+        }
+
+        .header {
+            padding: 15px;
+            border-bottom: 1px solid #e6e6e6;
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .compose-box {
+            padding: 15px;
+            border-bottom: 1px solid #e6e6e6;
+            display: flex;
+            gap: 10px;
+        }
+
+        .avatar-upload {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .avatar-upload input[type="file"] {
+            display: none;
+        }
+
+        .avatar-upload:hover::after {
+            content: "Change";
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #0085ff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .compose-input {
+            flex-grow: 1;
+            border: none;
+            font-size: 16px;
+            resize: none;
+            height: 100px;
+            outline: none;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+        }
+
+        .compose-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .char-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .post-button {
+            background-color: #0085ff;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .post-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .post {
+            padding: 15px;
+            border-bottom: 1px solid #e6e6e6;
+            display: flex;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post-content {
+            flex-grow: 1;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .username {
+            font-weight: 600;
+        }
+
+        .handle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 14px;
+            margin-left: auto;
+        }
+
+        .actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .action-button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            color: #0085ff;
+            background-color: rgba(0, 133, 255, 0.1);
+        }
+
+        .action-button.active {
+            color: #0085ff;
+        }
+
+        .search-container {
+            padding: 15px;
+            position: sticky;
+            top: 60px;
+            background: white;
+            z-index: 100;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #0085ff;
+            box-shadow: 0 0 0 2px rgba(0,133,255,0.1);
+        }
+
+        .comments-section {
+            margin-left: 50px;
+            margin-top: 10px;
+            border-left: 2px solid #e6e6e6;
+            padding-left: 10px;
+        }
+
+        .comment {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-top: 5px;
+        }
+
+        .comment-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+        }
+
+        .comment-textarea {
+            flex-grow: 1;
+            border: none;
+            resize: none;
+            padding: 5px;
+            font-size: 14px;
+            background: transparent;
+            outline: none;
+            min-height: 40px;
+        }
+
+        .comment-button {
+            background-color: #0085ff;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .comment-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .nested-comments {
+            margin-left: 20px;
+            border-left: 2px solid #e6e6e6;
+            padding-left: 10px;
+            margin-top: 5px;
+        }
+
+        .reply-button {
+            font-size: 12px;
+            color: #0085ff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .reply-button:hover {
+            background-color: rgba(0, 133, 255, 0.1);
+        }
+
+        .trending-topics {
+            padding: 15px;
+            border-bottom: 1px solid #e6e6e6;
+            background: white;
+            display: none;
+        }
+
+        .trending-topics h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .trending-topics ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .trending-topics ul li {
+            padding: 8px;
+            border-bottom: 1px solid #e6e6e6;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .trending-topics ul li:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 1200px) {
+            .navigation {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navigation">
+        <div class="nav-item active" data-view="home" onclick="switchView('home')">🏠 Home</div>
+        <div class="nav-item" data-view="search" onclick="switchView('search')">🔍 Search</div>
+        <div class="nav-item" data-view="trending" onclick="switchView('trending')">📈 Trending</div>
+        <div class="nav-item" data-view="notifications" onclick="switchView('notifications')">🔔 Notifications</div>
+        <div class="nav-item">✉️ Messages</div>
+        <div class="nav-item">👤 Profile</div>
+        <div class="nav-item">⚙️ Settings</div>
+    </nav>
+
+    <div class="container">
+        <header class="header">
+            <h2>Home</h2>
+            <div class="header-user">
+                <span id="currentTime">2025-04-06 16:40:22</span>
+            </div>
+        </header>
+
+        <div id="homeView">
+            <div class="compose-box">
+                <label class="avatar-upload">
+                    <input type="file" accept="image/*" onchange="handleProfilePicture(event)">
+                    <div id="userAvatar" class="avatar" style="background-color: #0085ff;">D</div>
+                </label>
+                <div style="flex-grow: 1;">
+                    <textarea id="postInput" class="compose-input" placeholder="What's up?"></textarea>
+                    <div class="compose-actions">
+                        <span class="char-count">300</span>
+                        <button id="postButton" class="post-button">Post</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="feed" class="feed"></div>
+        </div>
+
+        <div id="searchView" style="display: none;">
+            <div class="search-container">
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input" 
+                       placeholder="Search posts..."
+                       oninput="renderSearchResults(this.value)">
+            </div>
+            <div id="searchResults"></div>
+        </div>
+
+        <div id="trendingView" class="trending-topics">
+            <h3>Trending Topics</h3>
+            <ul id="trendingTopics">
+                <!-- Trending topics will be dynamically inserted here -->
+            </ul>
+        </div>
+
+        <div id="notificationsView" style="display: none;">
+            <h3>Notifications</h3>
+            <ul id="notificationsList">
+                <!-- Notifications will be dynamically inserted here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = 'darukkahraman';
+        let currentTime = new Date('2025-04-06T16:40:22Z');
+        const maxChars = 300;
+        let currentView = 'home';
+        let allPosts = [];
+        let notifications = [];
+
+        const users = {
+            darukkahraman: { color: '#0085ff', initial: 'D' },
+            newsBot: { color: '#FF6B6B', initial: '📰' },
+            weatherBot: { color: '#4ECDC4', initial: '🌤' },
+            cryptoBot: { color: '#45B7D1', initial: '💰' },
+            techBot: { color: '#96CEB4', initial: '💻' }
+        };
+
+        const botMessages = {
+            newsBot: [
+                "Breaking: New quantum computing breakthrough announced! 🔬",
+                "Global climate summit reaches historic agreement 🌍",
+                "Revolutionary cancer treatment shows 95% success rate 🏥",
+                "Space agency announces first Mars colony plans 🚀",
+                "New educational policy transforms learning worldwide 📚"
+            ],
+            weatherBot: [
+                "Sunny skies ahead! High of 24°C expected ☀️",
+                "Storm warning: Heavy rain expected tonight 🌧",
+                "Perfect beach day! UV index: moderate 🏖",
+                "Morning fog clearing up by noon 🌫",
+                "Wind speeds increasing, stay safe! 💨"
+            ],
+            cryptoBot: [
+                "BTC up 5% in the last hour! 📈",
+                "New DeFi protocol launches today 🚀",
+                "ETH gas fees at all-time low 💎",
+                "Major exchange announces new listing 📊",
+                "Crypto market cap reaches $5T 💰"
+            ],
+            techBot: [
+                "New iPhone 18 leaks reveal stunning design 📱",
+                "AI assistant passes human testing with 99.9% accuracy 🤖",
+                "Revolutionary battery technology announced 🔋",
+                "Quantum internet achieves major milestone 💻",
+                "Flying cars begin public testing phase ✈️"
+            ]
+        };
+
+        async function fetchTrendingTopics() {
+            const apiKey = 'YOUR_BING_SEARCH_API_KEY';
+            const response = await fetch(`https://api.bing.microsoft.com/v7.0/news/trendingtopics`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': apiKey
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Failed to fetch trending topics');
+                return;
+            }
+
+            const data = await response.json();
+            const trendingTopics = data.value.map(topic => topic.name);
+
+            return trendingTopics;
+        }
+
+        async function displayTrendingTopics() {
+            const topicsContainer = document.getElementById('trendingTopics');
+            const topics = await fetchTrendingTopics();
+
+            if (!topics) {
+                topicsContainer.innerHTML = '<p>Failed to load trending topics</p>';
+                return;
+            }
+
+            topicsContainer.innerHTML = topics.map(topic => `<li>${topic}</li>`).join('');
+        }
+
+        function savePost(content, username, timestamp, parentId = null) {
+            const post = {
+                id: Date.now(),
+                content,
+                user: username,
+                timestamp: timestamp || formatDate(currentTime),
+                parentId,
+                comments: []
+            };
+            
+            if (parentId) {
+                const parentPost = findPost(parentId);
+                if (parentPost) {
+                    parentPost.comments.push(post);
+                }
+            } else {
+                allPosts.unshift(post);
+            }
+            
+            localStorage.setItem('posts', JSON.stringify(allPosts));
+            return post;
+        }
+
+        function findPost(id, posts = allPosts) {
+            for (let post of posts) {
+                if (post.id === id) return post;
+                if (post.comments) {
+                    const found = findPost(id, post.comments);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function loadPosts() {
+            const savedPosts = localStorage.getItem('posts');
+            if (savedPosts) {
+                allPosts = JSON.parse(savedPosts);
+                allPosts.forEach(post => {
+                    if (currentView === 'home') {
+                        addPost(post.content, post.user, post.timestamp, false, null, post.id);
+                        if (post.comments) {
+                            renderComments(post.comments, document.getElementById(`comments-container-${post.id}`));
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderComments(comments, container) {
+            comments.forEach(comment => {
+                addComment(comment.parentId, comment.content, comment.user, comment.timestamp, comment.id);
+                if (comment.comments) {
+                    renderComments(comment.comments, document.getElementById(`comments-container-${comment.id}`));
+                }
+            });
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+            
+            document.getElementById('homeView').style.display = view === 'home' ? 'block' : 'none';
+            document.getElementById('searchView').style.display = view === 'search' ? 'block' : 'none';
+            document.getElementById('trendingView').style.display = view === 'trending' ? 'block' : 'none';
+            document.getElementById('notificationsView').style.display = view === 'notifications' ? 'block' : 'none';
+            
+            if (view === 'search') {
+                document.getElementById('searchInput').focus();
+                renderSearchResults('');
+            } else if (view === 'trending') {
+                displayTrendingTopics();
+            } else if (view === 'notifications') {
+                renderNotifications();
+            }
+        }
+
+        function renderSearchResults(query) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            
+            const filteredPosts = allPosts.filter(post => {
+                const content = post.content.toLowerCase();
+                const users = {
+                    darukkahraman: { color: '#0085ff', initial: 'D' },
+                    newsBot: { color: '#FF6B6B', initial: '📰' },
+                    weatherBot: { color: '#4ECDC4', initial: '🌤' },
+                    cryptoBot: { color: '#45B7D1', initial: '💰' },
+                    techBot: { color: '#96CEB4', initial: '💻' }
+};
+                return content.includes(query) || user.includes(query);
+            });
+            
+            filteredPosts.forEach(post => {
+                addPost(post.content, post.user, post.timestamp, true, searchResults, post.id);
+                if (post.comments) {
+                    renderComments(post.comments, document.getElementById(`comments-container-${post.id}`));
+                }
+            });
+        }
+
+        function getRandomMessage(bot) {
+            const messages = botMessages[bot];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        function getRandomBot() {
+            const bots = ['newsBot', 'weatherBot', 'cryptoBot', 'techBot'];
+            return bots[Math.floor(Math.random() * bots.length)];
+        }
+
+        function getRandomInterval() {
+            return Math.floor(Math.random() * (10000 - 5000 + 1) + 5000);
+        }
+
+        function makeBotPost() {
+            const bot = getRandomBot();
+            const message = getRandomMessage(bot);
+            const post = savePost(message, bot);
+            addPost(message, bot, null, false, null, post.id);
+            
+            setTimeout(makeBotPost, getRandomInterval());
+        }
+
+        function makeBotReply(parentId) {
+            const bot = getRandomBot();
+            const message = getRandomMessage(bot);
+            const comment = savePost(message, bot, null, parentId);
+            addComment(parentId, message, bot, null, comment.id);
+        }
+
+        function updateTime() {
+            currentTime.setSeconds(currentTime.getSeconds() + 1);
+            document.getElementById('currentTime').textContent = formatDate(currentTime);
+        }
+
+        setInterval(updateTime, 1000);
+
+        function handleProfilePicture(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.getElementById('userAvatar');
+                    avatar.style.backgroundImage = `url(${e.target.result})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.backgroundPosition = 'center';
+                    avatar.textContent = '';
+                    
+                    const userAvatars = document.querySelectorAll(`.avatar[data-user="${currentUser}"]`);
+                    userAvatars.forEach(userAvatar => {
+                        userAvatar.style.backgroundImage = `url(${e.target.result})`;
+                        userAvatar.style.backgroundSize = 'cover';
+                        userAvatar.style.backgroundPosition = 'center';
+                        userAvatar.textContent = '';
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('postInput').addEventListener('input', function(e) {
+            const remaining = maxChars - e.target.value.length;
+            document.querySelector('.char-count').textContent = remaining;
+            document.getElementById('postButton').disabled = remaining < 0 || e.target.value.trim().length === 0;
+        });
+
+        document.getElementById('postButton').addEventListener('click', function() {
+            const content = document.getElementById('postInput').value;
+            if (content.trim()) {
+                const post = savePost(content, currentUser);
+                addPost(content, currentUser, null, false, null, post.id);
+                document.getElementById('postInput').value = '';
+                document.querySelector('.char-count').textContent = '300';
+                this.disabled = true;
+
+                // Make a bot reply after a post is added
+                setTimeout(() => makeBotReply(post.id), getRandomInterval());
+
+                // Add notification
+                addNotification(`User ${currentUser} made a new post.`);
+            }
+        });
+
+        function formatDate(date) {
+            return date.toISOString().replace('T', ' ').substr(0, 19);
+        }
+
+        function addPost(content, username, timestamp, isSearch = false, container = null, postId = Date.now()) {
+            const post = document.createElement('div');
+            post.className = 'post';
+            
+            const likes = Math.floor(Math.random() * 50);
+            const reposts = Math.floor(Math.random() * 20);
+            const replies = Math.floor(Math.random() * 10);
+            
+            const userInfo = users[username];
+            const avatarStyle = userInfo ? `background-color: ${userInfo.color};` : 'background-color: #0085ff;';
+            const avatarContent = userInfo ? userInfo.initial : username[0].toUpperCase();
+            
+            post.innerHTML = `
+                <div class="avatar" data-user="${username}" style="${avatarStyle}">
+                    ${avatarContent}
+                </div>
+                <div class="post-content">
+                    <div class="post-header">
+                        <span class="username">${username}</span>
+                        <span class="handle">@${username}.bsky.social</span>
+                        <span class="timestamp">${timestamp || formatDate(currentTime)}</span>
+                    </div>
+                    <p>${content}</p>
+                    <div class="actions">
+                        <button class="action-button" onclick="toggleComments(${postId})">
+                            💭 <span class="action-count">${replies}</span>
+                        </button>
+                        <button class="action-button" onclick="updateCount(this)">
+                            🔄 <span class="action-count">${reposts}</span>
+                        </button>
+                        <button class="action-button" onclick="updateCount(this)">
+                            ❤️ <span class="action-count">${likes}</span>
+                        </button>
+                    </div>
+                    <div class="comments-section" id="comments-${postId}" style="display: none;">
+                        <div class="comment-input">
+                            <div class="comment-avatar" style="background-color: ${users[currentUser].color};">
+                                ${users[currentUser].initial}
+                            </div>
+                            <textarea 
+                                class="comment-textarea" 
+                                placeholder="Write a comment..."
+                                onInput="this.parentElement.querySelector('.comment-button').disabled = !this.value.trim()"
+                            ></textarea>
+                            <button 
+                                class="comment-button" 
+                                disabled
+                                onclick="addComment(${postId}, this.parentElement.querySelector('.comment-textarea').value)">
+                                Reply
+                            </button>
+                        </div>
+                        <div class="comments-container" id="comments-container-${postId}">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const targetContainer = container || document.getElementById('feed');
+            if (!isSearch) {
+                targetContainer.insertBefore(post, targetContainer.firstChild);
+            } else {
+                targetContainer.appendChild(post);
+            }
+
+            // Add notification for specific users' posts
+            if (username === currentUser) {
+                addNotification(`User ${username} made a new post.`);
+            }
+        }
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateCount(button) {
+            const countSpan = button.querySelector('.action-count');
+            let count = parseInt(countSpan.textContent);
+            
+            if (button.classList.contains('active')) {
+                button.classList.remove('active');
+                countSpan.textContent = count - 1;
+            } else {
+                button.classList.add('active');
+                countSpan.textContent = count + 1;
+            }
+        }
+
+        function addComment(postId, content, username = currentUser, timestamp = null, commentId = Date.now()) {
+            if (!content || typeof content !== 'string') return;
+            content = content.trim();
+            if (!content) return;
+
+            const userInfo = users[username];
+            const avatarStyle = userInfo ? `background-color: ${userInfo.color};` : 'background-color: #0085ff;';
+            const avatarContent = userInfo ? userInfo.initial : username[0].toUpperCase();
+
+            const commentsContainer = document.getElementById(`comments-container-${postId}`);
+            
+            const comment = document.createElement('div');
+            comment.className = 'comment';
+            comment.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-avatar" style="${avatarStyle}">
+                        ${avatarContent}
+                    </div>
+                    <span class="username">${username}</span>
+                    <span class="handle">@${username}.bsky.social</span>
+                    <span class="timestamp">${timestamp || formatDate(currentTime)}</span>
+                </div>
+                <p>${content}</p>
+                <button class="reply-button" onclick="showReplyInput(${postId}, ${commentId})">Reply</button>
+                <div class="nested-comments" id="nested-comments-${commentId}">
+                </div>
+            `;
+
+            commentsContainer.appendChild(comment);
+            const post = findPost(postId);
+            const savedComment = savePost(content, username, timestamp, commentId);
+            if (post) {
+                post.comments.push(savedComment);
+            }
+
+            // Make a bot reply after a comment is added
+            setTimeout(() => makeBotReply(commentId), getRandomInterval());
+
+            // Add notification for specific users' comments
+            if (username === currentUser) {
+                addNotification(`User ${username} commented on a post.`);
+            }
+        }
+
+        function showReplyInput(postId, commentId) {
+            const nestedComments = document.getElementById(`nested-comments-${commentId}`);
+            const replyInput = document.createElement('div');
+            replyInput.className = 'comment-input';
+            replyInput.innerHTML = `
+                <div class="comment-avatar" style="background-color: ${users[currentUser].color};">
+                    ${users[currentUser].initial}
+                </div>
+                <textarea 
+                    class="comment-textarea" 
+                    placeholder="Write a reply..."
+                    oninput="this.parentElement.querySelector('.comment-button').disabled = !this.value.trim()"
+                ></textarea>
+                <button 
+                    class="comment-button" 
+                    disabled
+                    onclick="addComment(${postId}, this.parentElement.querySelector('.comment-textarea').value, '${currentUser}', null, ${Date.now()})">
+                    Reply
+                </button>
+            `;
+            nestedComments.appendChild(replyInput);
+        }
+
+        function addNotification(message) {
+            const notification = {
+                id: Date.now(),
+                message: message,
+                timestamp: formatDate(currentTime)
+            };
+            notifications.unshift(notification);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            const notificationsList = document.getElementById('notificationsList');
+            notificationsList.innerHTML = '';
+            notifications.forEach(notification => {
+                const notificationItem = document.createElement('li');
+                notificationItem.textContent = `${notification.timestamp} - ${notification.message}`;
+                notificationsList.appendChild(notificationItem);
+            });
+        }
+
+        // Initial load
+        loadPosts();
+        makeBotPost();
+        setTimeout(makeBotPost, getRandomInterval());
+        renderNotifications();
+
+    </script>
+</body>
+</html>
+
+botlar gönderilere yorum yapabilsin
